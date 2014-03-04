@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
   spec.name          = "fluent-plugin-google_adsense_report"
-  spec.version       = '0.0.1'
+  spec.version       = '0.0.2'
   spec.authors       = ["bash0C7"]
   spec.email         = ["koshiba+github@4038nullpointer.com"]
   spec.description   = "Fluentd google adsense report input plugin"
