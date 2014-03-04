@@ -51,30 +51,29 @@ module Fluent
 
     def execute
       date = Date.today.strftime('%Y-%m-%d')
-      responses = @metrics.split(',').map do |metric|
-        response = @client.execute(
-          :api_method => @api_method,
-          :parameters => {
-            :startDate=> date,
-            :endDate=> date,
-            :accountId=> @account_id,
-            :dimension => [@dimension],
-            :locale => @locale,
-            :maxResults => @max_results,
-            :metric => [metric],
-            :useTimezoneReporting => @use_timezone_reporting,
-          }
-        )
-        sleep 3
+      @client.authorization.fetch_access_token!
+      response = @client.execute(
+        :api_method => @api_method,
+        :parameters => {
+          :startDate=> date,
+          :endDate=> date,
+          :accountId=> @account_id,
+          :dimension => [@dimension],
+          :locale => @locale,
+          :maxResults => @max_results,
+          :metric => @metrics.split(','),
+          :useTimezoneReporting => @use_timezone_reporting,
+        }
+      )
 
-        response
+      header_names = response.data.headers.map {|h| h.name}
+      header_names.shift
+      result = response.data.rows.map do |row|
+        channel = row.shift
+        keys = header_names.map {|name| "#{channel}_#{name}"}
+        alist = keys.zip row
+        Hash[alist]
       end
-
-      result = responses.map do |response|
-        response.data.rows.map do |row|
-          {"#{row.first}_#{response.data.headers.last.name}" => row.last }
-        end
-      end.flatten
 
       result
     end
